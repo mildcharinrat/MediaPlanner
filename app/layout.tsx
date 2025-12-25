@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "AI-powered Q&A Assistant for Junior Digital Planners - Get help with Media Planning, Campaign Strategy, KPI/Funnel Analysis, and Performance Marketing",
 };
 
+import NavBar from "./components/NavBar";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <NavBar />
+        <main className="pt-20">
+          {children}
+        </main>
       </body>
     </html>
   );

@@ -53,10 +53,23 @@ export const plannerRules = pgTable('planner_rules', {
 // ============================================================================
 export const plannerSessions = pgTable('planner_sessions', {
     id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id'), // Optional link to registered user
     answers: jsonb('answers').notNull(),
     recommendation: jsonb('recommendation'),
     totalBudget: decimal('total_budget', { precision: 12, scale: 2 }),
     createdAt: timestamp('created_at').defaultNow(),
+});
+
+// ============================================================================
+// users - User accounts
+// ============================================================================
+export const users = pgTable('users', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    email: text('email').notNull().unique(),
+    password: text('password').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // Export types
@@ -69,6 +82,9 @@ export type NewPlannerStep = typeof plannerSteps.$inferInsert;
 export type NewPlannerOption = typeof plannerOptions.$inferInsert;
 export type NewPlannerRule = typeof plannerRules.$inferInsert;
 export type NewPlannerSession = typeof plannerSessions.$inferInsert;
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 
 // ============================================================================
 // Relations (for relational queries)
