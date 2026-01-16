@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { AllocationChart } from "./components/AllocationChart";
 import ChatUI from "./components/ChatUI";
 import { Model, QUESTIONS } from "./lib/planner-data";
+import { BrainCircuit } from "lucide-react";
 
 type Step = "start" | "wizard" | "processing" | "result";
 type Answers = { [key: string]: string };
@@ -15,6 +16,83 @@ const PROCESSING_MESSAGES = [
   "Optimizing media mix for maximum ROI...",
   "Generating strategic recommendations...",
 ];
+
+// Type definitions to ensure type safety, inferring from component state and usage
+type ResultData = {
+  model: {
+    fb: number;
+    gg: number;
+    tt: number;
+  };
+  efficiency: number;
+};
+
+/**
+ * Generates a structured AI analysis based on the results and answers.
+ * This separates the "AI" logic from the presentation layer, creating cleaner code.
+ */
+const generateAiAnalysis = (result: ResultData, answers: Answers) => {
+  return {
+    "📌 Strategy Rationale (Explain)": [
+      `จากการประเมินด้วย Logic v2.0 แบรนด์ของคุณมีความแข็งแกร่งทางยุทธศาสตร์ที่ ${
+        result.efficiency
+      }% โดยเหมาะสมกับ ${
+        result.model.fb > result.model.gg ? "Facebook" : "Google"
+      } Hero เป็นหลัก เนื่องจากพฤติกรรมลูกค้าเน้น ${
+        answers.q1 === "Low" ? "Impulse Buy" : "Research-driven"
+      }`,
+    ],
+    "💡 Strategic Advisor": [
+      `รันแคมเปญที่มุ่งเน้น ${
+        answers.q4 === "Low"
+          ? "Self-checkout Conversion"
+          : "Qualified Lead Generation"
+      } เพื่อประสิทธิภาพสูงสุด`,
+      `ขยายสเกลโดยใช้ Bidding แบบ ${
+        result.efficiency > 70 ? "Target ROAS" : "Maximize Conversions"
+      } เพื่อเร่งการเรียนรู้ของ Algorithm`,
+      `พัฒนา Creative ที่ตอบโจทย์ช่วงอายุ Gen ${
+        answers.q8.includes("18") ? "Z" : "Millennials/X"
+      }`,
+    ],
+    "⚠️ Execution Precautions": [
+      result.model.fb > 50
+        ? "ระวัง Ad Fatigue บน Facebook ชุดโฆษณาเดิมควรเปลี่ยนทุก 10-14 วัน"
+        : "ระวัง Bidding War บน Google Keyword ที่มีการแข่งขันสูงจน CPC พุ่ง",
+      answers.q5 === "Weak"
+        ? "คำเตือน: ระบบ Tracking ยังไม่สมบูรณ์ การเทงบปริมาณมากอาจสูญเปล่า"
+        : "หมั่นตรวจสอบ Deduplication ของ Conversion ระหว่าง Pixel และ API",
+    ],
+  };
+};
+
+/**
+ * A clean component to display the generated AI analysis.
+ */
+const AiAnalysisDisplay = ({
+  analysis,
+}: {
+  analysis: ReturnType<typeof generateAiAnalysis>;
+}) => {
+  return (
+    <div className="flex-1 overflow-y-auto custom-scrollbar pr-3 text-[14px] text-zinc-400 font-medium leading-loose space-y-6">
+      {Object.entries(analysis).map(([category, points]) => (
+        <div key={category}>
+          <h4 className="text-md font-black text-purple-500 uppercase tracking-[0.3em] mb-4">
+            {category}
+          </h4>
+          <div className="space-y-2">
+            {points.map((point, i) => (
+              <p key={i} className="text-zinc-300 text-sm">
+                {point}
+              </p>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default function PlannerPage() {
   const [currentStep, setCurrentStep] = useState<Step>("start");
@@ -129,8 +207,8 @@ export default function PlannerPage() {
               <h1 className="text-base font-extrabold uppercase tracking-widest text-white leading-tight">
                 Media Planner
               </h1>
-              <p className="text-[9px] text-purple-400 font-black uppercase tracking-[0.2em]">
-                Business Logic v2.0 | Ecommerce
+              <p className="text-[10px] text-purple-400 font-medium uppercase tracking-[0.2em]">
+                Business: Ecommerce | Objective: Conversion 
               </p>
             </div>
           </div>
@@ -287,7 +365,8 @@ export default function PlannerPage() {
               <div
                 className="w-36 h-36 bg-zinc-900 border border-zinc-800 rounded-[3.5rem] flex items-center justify-center shadow-2xl relative overflow-hidden animate-spin-slow">
                 <div className="absolute inset-0 bg-purple-600/10 animate-pulse"></div>
-                <span className="text-5xl relative z-10">&#x1F9E0;</span>
+                <span className="text-5xl relative z-10">                <BrainCircuit />
+</span>
               </div>
               <div className="absolute -top-2 right-12 w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center shadow-md border border-zinc-800 text-white text-lg z-20">
                 ⚡
@@ -334,11 +413,11 @@ export default function PlannerPage() {
               <div className="flex gap-4">
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-12 py-5 bg-zinc-900 border border-zinc-800 text-white font-black rounded-2xl hover:bg-zinc-800 transition-all uppercase tracking-widest text-[11px]"
+                  className="px-12 py-5 bg-zinc-900 border border-zinc-800 text-white font-medium rounded-2xl hover:bg-zinc-800 transition-all uppercase tracking-widest text-md"
                 >
                   New Planning
                 </button>
-                <button
+                {/* <button
                   onClick={() => setShowChat(true)}
                   className="px-12 py-5 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-700 transition-all uppercase tracking-widest text-[11px] flex items-center gap-2"
                 >
@@ -347,13 +426,13 @@ export default function PlannerPage() {
                     <path d="M15 7v2a2 2 0 01-2 2H9.414l-1.414-1.414A2 2 0 015 8V7a2 2 0 012-2h7a2 2 0 012 2z" />
                   </svg>
                   Chat with AI
-                </button>
+                </button> */}
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
               <div className="lg:col-span-4 bg-[#0f0f0f] p-10 rounded-[3rem] border border-zinc-800 flex flex-col items-center">
-                <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.4em] mb-12">
+                <h3 className="text-[12px] font-medium text-white uppercase tracking-[0.4em] mb-12">
                   Media budget allocation
                 </h3>
                 <div className="chart-container">
@@ -376,24 +455,7 @@ export default function PlannerPage() {
                 <h4 className="text-sm font-black text-purple-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
                   <span>✨</span> AI Director Planner Pro Tips:
                 </h4>
-                <div className="flex-1 overflow-y-auto custom-scrollbar pr-3 text-[14px] text-zinc-400 font-medium leading-loose whitespace-pre-line"
-                  dangerouslySetInnerHTML={{
-                    __html: `
-                📌 **Strategy Rationale (Explain):**
-                จากการประเมินด้วย Logic v2.0 แบรนด์ของคุณมีความแข็งแกร่งทางยุทธศาสตร์ที่ ${result.efficiency}% โดยเหมาะสมกับ ${result.model.fb > result.model.gg ? 'Facebook' : 'Google'} Hero เป็นหลัก เนื่องจากพฤติกรรมลูกค้าเน้น ${answers.q1 === 'Low' ? 'Impulse Buy' : 'Research-driven'}
-
-                💡 **Strategic Advisor:**
-                1. รันแคมเปญที่มุ่งเน้น ${answers.q4 === 'Low' ? 'Self-checkout Conversion' : 'Qualified Lead Generation'} เพื่อประสิทธิภาพสูงสุด
-                2. ขยายสเกลโดยใช้ Bidding แบบ ${result.efficiency > 70 ? 'Target ROAS' : 'Maximize Conversions'} เพื่อเร่งการเรียนรู้ของ Algorithm
-                3. พัฒนา Creative ที่ตอบโจทย์ช่วงอายุ Gen ${answers.q8.includes('18') ? 'Z' : 'Millennials/X'}
-
-                ⚠️ **Execution Precautions:**
-                - ${result.model.fb > 50 ? 'ระวัง Ad Fatigue บน Facebook ชุดโฆษณาเดิมควรเปลี่ยนทุก 10-14 วัน' : 'ระวัง Bidding War บน Google Keyword ที่มีการแข่งขันสูงจน CPC พุ่ง'}
-                - ${answers.q5 === 'Weak' ? 'คำเตือน: ระบบ Tracking ยังไม่สมบูรณ์ การเทงบปริมาณมากอาจสูญเปล่า' : 'หมั่นตรวจสอบ Deduplication ของ Conversion ระหว่าง Pixel และ API'}
-            `.replace(/\n/g, '<br>')
-                  }}
-                >
-                </div>
+                <AiAnalysisDisplay analysis={generateAiAnalysis(result, answers)} />
               </div>
 
               <div className="lg:col-span-4 bg-[#0f0f0f] p-10 rounded-[3rem] border border-zinc-800 flex flex-col min-h-[500px]">
@@ -410,7 +472,7 @@ export default function PlannerPage() {
                   {result.model.recs.map((rec, i) => (
                     <div key={i} className="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl flex gap-4">
                       <div className="w-7 h-7 rounded-lg bg-white text-black flex items-center justify-center text-[10px] font-black shrink-0">0{i + 1}</div>
-                      <p className="text-[13px] font-bold text-zinc-400">{rec}</p>
+                      <p className="text-[15px] font-medium text-zinc-400">{rec}</p>
                     </div>
                   ))}
                 </div>

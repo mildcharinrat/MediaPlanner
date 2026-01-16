@@ -11,14 +11,35 @@ interface AllocationChartProps {
 }
 
 export function AllocationChart({ fb, gg, tt }: AllocationChartProps) {
+  // Define colors consistent with the design and image provided
+  const channelColors = {
+    fb: "#7c3aed", // Purple for Facebook
+    gg: "#3f3f46", // Dark Gray for Google to match the image
+    tt: "#ffffff", // White for TikTok
+  };
+
+  const activeChannels = [];
+  if (fb > 0) {
+    activeChannels.push({ name: "FB", value: fb, color: channelColors.fb });
+  }
+  if (gg > 0) {
+    activeChannels.push({ name: "GG", value: gg, color: channelColors.gg });
+  }
+  if (tt > 0) {
+    activeChannels.push({ name: "TT", value: tt, color: channelColors.tt });
+  }
+  
+  const hasData = activeChannels.length > 0;
+
   const data = {
-    labels: ["Facebook", "Google", "TikTok"],
+    labels: hasData ? activeChannels.map(c => `${c.name} ${c.value}%`) : ['No Data'],
     datasets: [
       {
-        data: [fb, gg, tt],
-        backgroundColor: ["#7c3aed", "#ffffff", "#27272a"],
+        data: hasData ? activeChannels.map(c => c.value) : [100],
+        backgroundColor: hasData ? activeChannels.map(c => c.color) : ['#27272a'],
         borderColor: "#050505",
         borderWidth: 10,
+        hoverBorderWidth: 10,
       },
     ],
   };
@@ -28,10 +49,34 @@ export function AllocationChart({ fb, gg, tt }: AllocationChartProps) {
     cutout: "80%",
     plugins: {
       legend: {
-        display: false,
+        display: false, // The legend is now displayed in the center via HTML
+      },
+      tooltip: {
+        enabled: hasData, // Disable tooltips if there is no data
       },
     },
   };
 
-  return <Doughnut data={data} options={options} />;
+  return (
+    <div className="relative w-full h-full">
+      <Doughnut data={data} options={options} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-start justify-center gap-y-2">
+        {hasData ? (
+          activeChannels.map((channel) => (
+            <div key={channel.name} className="flex items-center gap-x-3">
+              <span
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: channel.color }}
+              ></span>
+              <span className="text-white font-semibold text-base tracking-wider">
+                {channel.name} {channel.value}%
+              </span>
+            </div>
+          ))
+        ) : (
+          <div className="text-zinc-500 font-semibold text-base">No Data</div>
+        )}
+      </div>
+    </div>
+  );
 }
