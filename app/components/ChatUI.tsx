@@ -9,8 +9,6 @@
  * - Shows loading states
  */
 
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
 import Header from './Header';
 import QuestionInput from './QuestionInput';
@@ -18,7 +16,12 @@ import AnswerCard from './AnswerCard';
 import LoadingState from './LoadingState';
 import { QAPair, ChatResponse } from '../types';
 
-export default function ChatUI() {
+interface ChatUIProps {
+  initialContext: any;
+  onClose: () => void;
+}
+
+export default function ChatUI({ initialContext, onClose }: ChatUIProps) {
     const [qaPairs, setQAPairs] = useState<QAPair[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -50,7 +53,8 @@ export default function ChatUI() {
                 body: JSON.stringify({
                     question,
                     // Optionally send previous questions for context
-                    context: qaPairs.slice(-3).map(qa => qa.question)
+                    context: qaPairs.slice(-3).map(qa => qa.question),
+                    plan: initialContext, // Add the plan context
                 }),
             });
 
@@ -82,6 +86,14 @@ export default function ChatUI() {
 
     return (
         <div className="min-h-screen w-full bg-background relative">
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-20 text-white bg-zinc-800 rounded-full p-2 hover:bg-zinc-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
             {/* Animated radial gradient background */}
             <div className="fixed inset-0 z-0 opacity-30">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent animate-pulse" />

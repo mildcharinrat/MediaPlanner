@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AllocationChart } from "./components/AllocationChart";
+import ChatUI from "./components/ChatUI";
 import { Model, QUESTIONS } from "./lib/planner-data";
 
 type Step = "start" | "wizard" | "processing" | "result";
@@ -24,6 +25,7 @@ export default function PlannerPage() {
   const [error, setError] = useState<string | null>(null);
   const [showTimeoutHint, setShowTimeoutHint] = useState(false);
   const [processingMessage, setProcessingMessage] = useState("");
+  const [showChat, setShowChat] = useState(false);
 
 
   useEffect(() => {
@@ -294,7 +296,7 @@ export default function PlannerPage() {
             <div className="space-y-4">
               <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">STRATEGIC AUDIT</h2>
               <p className="text-lg text-zinc-400 font-medium">{processingMessage}</p>
-              <h4 className="text-xs font-black text-zinc-600 uppercase tracking-[0.3em]">
+              <h4 className="text-xl font-black text-zinc-600 uppercase tracking-[0.3em]">
                 CONSTRUCTING MIX FOR {clientName}
               </h4>
             </div>
@@ -335,6 +337,16 @@ export default function PlannerPage() {
                   className="px-12 py-5 bg-zinc-900 border border-zinc-800 text-white font-black rounded-2xl hover:bg-zinc-800 transition-all uppercase tracking-widest text-[11px]"
                 >
                   New Planning
+                </button>
+                <button
+                  onClick={() => setShowChat(true)}
+                  className="px-12 py-5 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-700 transition-all uppercase tracking-widest text-[11px] flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                    <path d="M15 7v2a2 2 0 01-2 2H9.414l-1.414-1.414A2 2 0 015 8V7a2 2 0 012-2h7a2 2 0 012 2z" />
+                  </svg>
+                  Chat with AI
                 </button>
               </div>
             </div>
@@ -407,6 +419,12 @@ export default function PlannerPage() {
           </div>
         )}
       </main>
+
+      {showChat && result && (
+        <div className="fixed inset-0 bg-black/80 z-50 animate-slide-up">
+          <ChatUI initialContext={result} onClose={() => setShowChat(false)} />
+        </div>
+      )}
 
       <footer className="w-full py-10 text-center text-[10px] text-zinc-800 font-black uppercase tracking-[0.5em]">
         &copy; 2026 Strategy Intelligence Engine &bull; Enterprise Framework
